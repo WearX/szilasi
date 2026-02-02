@@ -25,26 +25,26 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <h1>Fájlkezelő</h1>
-        <button className="btn btn-logout" onClick={logout}>
+    <div className="main-container">
+      <header className="main-header">
+        <div className="header-left">
+          <div className="user-avatar">?</div>
+          <div className="user-info">
+            <h2>Fájlkezelő</h2>
+          </div>
+        </div>
+        <button className="btn-logout" onClick={logout}>
           Kijelentkezés
         </button>
       </header>
 
-      <main className="main-content">
-        <div className="upload-grid">
+      <div className="content-area">
+        <div className="sections-grid">
           <AvatarUpload />
           <MultiFileUpload onUploadComplete={handleUploadComplete} />
+          <FileList refreshTrigger={refreshTrigger} />
         </div>
-
-        <FileList refreshTrigger={refreshTrigger} />
-      </main>
-
-      <footer className="footer">
-        <p>Fájlkezelő alkalmazás</p>
-      </footer>
+      </div>
     </div>
   );
 }

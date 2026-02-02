@@ -34,19 +34,20 @@ export const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>{isRegister ? 'Regisztráció' : 'Bejelentkezés'}</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1>{isRegister ? 'Regisztráció' : 'Belépés'}</h1>
 
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {isRegister && (
-            <div className="form-group">
+            <div className="input-group">
               <label htmlFor="name">Név</label>
               <input
                 id="name"
                 type="text"
+                placeholder="Teljes neved"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -55,11 +56,12 @@ export const Login = ({ onLogin }: LoginProps) => {
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <div className="input-group">
+            <label htmlFor="email">Email cím</label>
             <input
               id="email"
               type="email"
+              placeholder="pelda@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -67,11 +69,12 @@ export const Login = ({ onLogin }: LoginProps) => {
             />
           </div>
 
-          <div className="form-group">
+          <div className="input-group">
             <label htmlFor="password">Jelszó</label>
             <input
               id="password"
               type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -80,20 +83,18 @@ export const Login = ({ onLogin }: LoginProps) => {
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Betöltés...' : isRegister ? 'Regisztráció' : 'Bejelentkezés'}
+            {loading ? 'Betöltés...' : isRegister ? 'Regisztráció' : 'Belépés'}
           </button>
-        </form>
 
-        <p className="toggle-text">
-          {isRegister ? 'Már van fiókod?' : 'Nincs még fiókod?'}{' '}
           <button
             type="button"
-            className="link-btn"
+            className="btn btn-secondary"
             onClick={() => setIsRegister(!isRegister)}
+            disabled={loading}
           >
-            {isRegister ? 'Bejelentkezés' : 'Regisztráció'}
+            {isRegister ? 'Már van fiókom' : 'Új fiók létrehozása'}
           </button>
-        </p>
+        </form>
       </div>
     </div>
   );

@@ -72,39 +72,32 @@ export const FileList = ({ refreshTrigger }: FileListProps) => {
     return icons[ext || ''] || '📎';
   };
 
-  if (loading) {
-    return (
-      <div className="file-list-section">
-        <h3>Feltöltött fájlok</h3>
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <span>Betöltés...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="file-list-section">
+    <div className="profile-section full-width">
       <h3>Feltöltött fájlok</h3>
 
       {error && <div className="error-message">{error}</div>}
 
-      {files.length === 0 ? (
+      {loading ? (
+        <div className="loading">
+          <div className="spinner"></div>
+          <span>Betöltés...</span>
+        </div>
+      ) : files.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-icon">📂</span>
-          <span>Még nincs feltöltött fájlod</span>
+          <div className="icon">📂</div>
+          <span>Nincsenek feltöltött fájlok</span>
         </div>
       ) : (
-        <div className="file-grid">
+        <div className="files-list">
           {files.map((file, index) => (
-            <div key={index} className="file-card">
+            <div key={index} className="file-item">
               <span className="file-icon">{getFileIcon(file.name)}</span>
               <span className="file-name" title={file.name}>
                 {file.name}
               </span>
               <button
-                className="btn btn-download"
+                className="btn-download"
                 onClick={() => handleDownload(file)}
               >
                 Letöltés
@@ -114,7 +107,11 @@ export const FileList = ({ refreshTrigger }: FileListProps) => {
         </div>
       )}
 
-      <button className="btn btn-secondary" onClick={fetchFiles}>
+      <button
+        className="btn btn-secondary"
+        onClick={fetchFiles}
+        style={{ marginTop: '12px' }}
+      >
         Frissítés
       </button>
     </div>

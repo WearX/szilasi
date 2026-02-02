@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { api } from '../services/api';
 
 const MAX_FILES = 10;
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB per file
+const MAX_SIZE = 5 * 1024 * 1024;
 
 interface SelectedFile {
   file: File;
@@ -19,7 +19,7 @@ export const MultiFileUpload = ({ onUploadComplete }: { onUploadComplete: () => 
 
   const validateFile = (file: File): string | undefined => {
     if (file.size > MAX_SIZE) {
-      return `${file.name}: Maximum 5MB engedélyezett`;
+      return 'Maximum 5MB engedélyezett';
     }
     return undefined;
   };
@@ -36,6 +36,7 @@ export const MultiFileUpload = ({ onUploadComplete }: { onUploadComplete: () => 
     }
 
     setError('');
+    setSuccess('');
     const newFiles: SelectedFile[] = fileArray.map((file) => ({
       file,
       id: `${file.name}-${Date.now()}-${Math.random()}`,
@@ -87,25 +88,24 @@ export const MultiFileUpload = ({ onUploadComplete }: { onUploadComplete: () => 
   const validCount = selectedFiles.filter((f) => !f.error).length;
 
   return (
-    <div className="upload-section">
+    <div className="profile-section">
       <h3>Fájlok feltöltése</h3>
-      <p className="upload-info">Maximum 10 fájl, egyenként max 5MB</p>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
       <div
-        className="drop-zone"
+        className="file-drop-zone"
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={() => fileInputRef.current?.click()}
       >
-        <div className="drop-placeholder">
-          <span className="drop-icon">📁</span>
+        <div className="drop-text">
+          <div className="icon">📁</div>
           <span>Kattints vagy húzd ide a fájlokat</span>
-          <span className="drop-hint">
+          <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
             {selectedFiles.length}/{MAX_FILES} fájl kiválasztva
-          </span>
+          </div>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export const MultiFileUpload = ({ onUploadComplete }: { onUploadComplete: () => 
       {selectedFiles.length > 0 && (
         <div className="selected-files">
           {selectedFiles.map(({ file, id, error: fileError }) => (
-            <div key={id} className={`file-item ${fileError ? 'has-error' : ''}`}>
+            <div key={id} className={`selected-file-item ${fileError ? 'has-error' : ''}`}>
               <div className="file-info">
                 <span className="file-name">{file.name}</span>
                 <span className="file-size">{formatSize(file.size)}</span>
@@ -142,9 +142,12 @@ export const MultiFileUpload = ({ onUploadComplete }: { onUploadComplete: () => 
         className="btn btn-primary"
         onClick={handleUpload}
         disabled={validCount === 0 || loading}
+        style={{ marginTop: '12px' }}
       >
         {loading ? 'Feltöltés...' : `${validCount} fájl feltöltése`}
       </button>
+
+      <p className="hint">Maximum 10 fájl, egyenként max 5MB</p>
     </div>
   );
 };

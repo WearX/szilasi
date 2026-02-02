@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { api } from '../services/api';
 
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/png', 'image/jpg', 'image/jpeg'];
 
 export const AvatarUpload = () => {
@@ -33,6 +33,7 @@ export const AvatarUpload = () => {
     }
 
     setError('');
+    setSuccess('');
     const reader = new FileReader();
     reader.onload = () => setPreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -48,7 +49,7 @@ export const AvatarUpload = () => {
 
     try {
       await api.uploadAvatar(file);
-      setSuccess('Avatar sikeresen feltöltve!');
+      setSuccess('Profilkép sikeresen feltöltve!');
       setPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
@@ -70,6 +71,7 @@ export const AvatarUpload = () => {
     }
 
     setError('');
+    setSuccess('');
     if (fileInputRef.current) {
       const dt = new DataTransfer();
       dt.items.add(file);
@@ -82,44 +84,53 @@ export const AvatarUpload = () => {
   };
 
   return (
-    <div className="upload-section">
-      <h3>Avatar feltöltés</h3>
-      <p className="upload-info">PNG, JPG vagy JPEG formátum, max 5MB</p>
+    <div className="profile-section">
+      <h3>Profilkép</h3>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
-      <div
-        className={`drop-zone avatar-drop ${preview ? 'has-preview' : ''}`}
-        onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {preview ? (
-          <img src={preview} alt="Avatar preview" className="avatar-preview" />
-        ) : (
-          <div className="drop-placeholder">
-            <span className="drop-icon">📷</span>
-            <span>Kattints vagy húzd ide a képet</span>
+      <div className="avatar-section">
+        <div className="avatar-preview">
+          <div className="large-avatar">
+            {preview ? (
+              <img src={preview} alt="Avatar preview" />
+            ) : (
+              '?'
+            )}
           </div>
-        )}
+        </div>
+
+        <div
+          className={`avatar-drop-zone ${preview ? 'has-file' : ''}`}
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="drop-text">
+            <div className="icon">📷</div>
+            <span>{preview ? 'Kép kiválasztva' : 'Kattints vagy húzd ide a képet'}</span>
+          </div>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".png,.jpg,.jpeg"
+          onChange={handleFileSelect}
+          className="hidden-input"
+        />
+
+        <button
+          className="btn btn-primary"
+          onClick={handleUpload}
+          disabled={!preview || loading}
+        >
+          {loading ? 'Feltöltés...' : 'Profilkép feltöltése'}
+        </button>
+
+        <p className="hint">PNG, JPG vagy JPEG formátum, max 5MB</p>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".png,.jpg,.jpeg"
-        onChange={handleFileSelect}
-        className="hidden-input"
-      />
-
-      <button
-        className="btn btn-primary"
-        onClick={handleUpload}
-        disabled={!preview || loading}
-      >
-        {loading ? 'Feltöltés...' : 'Avatar feltöltése'}
-      </button>
     </div>
   );
 };
