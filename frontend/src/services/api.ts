@@ -4,7 +4,7 @@ const API_BASE = 'http://localhost:3000';
 
 const getAuthHeader = (): HeadersInit => {
   const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return token ? { 'x-access-token': token } : {};
 };
 
 export const api = {

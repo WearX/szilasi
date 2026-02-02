@@ -33,7 +33,7 @@ export const FileList = ({ refreshTrigger }: FileListProps) => {
     const token = localStorage.getItem('token');
     try {
       const response = await fetch(file.url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 'x-access-token': token || '' },
       });
 
       if (!response.ok) throw new Error('Letöltés sikertelen');
