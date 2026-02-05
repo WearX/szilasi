@@ -1,6 +1,7 @@
 import { Response } from "express";
 import mysql from "mysql2/promise";
 import config from "../config/config";
+import { uploadChatImageMiddleware } from "../middleware/upload";
 
 export const getMessages = async (req: any, res: Response) => {
     try {
@@ -43,5 +44,34 @@ export const createMessage = async (req: any, res: Response) => {
 };
 
 export const deleteMessages = async (_req: any, res: Response) => {
-    res.json({ message: "Törlés funkció" }); 
+    res.json({ message: "Törlés funkció" });
+};
+
+export const uploadChatImage = async (req: any, res: Response) => {
+    try {
+        await uploadChatImageMiddleware(req, res);
+
+        if (!req.file) {
+            return res.status(400).json({ error: "Nincs kép" });
+        }
+
+        const sender = req.user.email;
+        const { targetEmail, groupId } = req.body;
+        const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+        const message = `[image:${imageUrl}]`;
+
+        const db = await mysql.createConnection(config.database);
+
+        await db.query(
+            "INSERT INTO messages (senderEmail, receiverEmail, groupId, message) VALUES (?, ?, ?, ?)",
+            [sender, targetEmail || null, groupId || null, message]
+        );
+
+        await db.end();
+
+        res.status(201).json({ url: imageUrl });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Képfeltöltés sikertelen" });
+    }
 };

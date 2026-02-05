@@ -15,8 +15,10 @@ export const Chat = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadData();
@@ -70,6 +72,61 @@ export const Chat = () => {
     await api.sendMessage(payload);
     socketRef.current?.send(JSON.stringify(payload));
     setInputValue('');
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Csak képfájl tölthető fel!');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Max 5MB méretű kép!');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const result = await api.uploadChatImage(file, target);
+
+      const payload: { message: string; imageUrl?: string; targetEmail?: string; groupId?: number } = {
+        message: `[image:${result.url}]`,
+        imageUrl: result.url,
+      };
+
+      if (target.startsWith('GRP_')) {
+        payload.groupId = parseInt(target.split('_')[1]);
+      } else if (target) {
+        payload.targetEmail = target;
+      }
+
+      await api.sendMessage(payload);
+      socketRef.current?.send(JSON.stringify(payload));
+    } catch (err) {
+      alert('Képfeltöltés sikertelen!');
+    }
+
+    setUploading(false);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
+  const renderMessageContent = (message: string) => {
+    const imageMatch = message.match(/\[image:(.*?)\]/);
+    if (imageMatch) {
+      return (
+        <img
+          src={imageMatch[1]}
+          alt="Küldött kép"
+          className="message-image"
+          onClick={() => window.open(imageMatch[1], '_blank')}
+        />
+      );
+    }
+    return message;
   };
 
   const filteredMessages = messages.filter((m) => {
@@ -155,7 +212,9 @@ export const Chat = () => {
                 <span className="message-sender">
                   {isMe ? 'Te' : m.senderEmail?.split('@')[0]}
                 </span>
-                <div className="message-bubble">{m.message}</div>
+                <div className="message-bubble">
+                  {renderMessageContent(m.message)}
+                </div>
               </div>
             );
           })
@@ -165,6 +224,27 @@ export const Chat = () => {
 
       <div className="input-area">
         <div className="input-wrapper">
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageSelect}
+          />
+          <button
+            className="btn-image"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={uploading}
+            title="Kép küldése"
+          >
+            {uploading ? (
+              <div className="spinner-small" />
+            ) : (
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            )}
+          </button>
           <input
             placeholder="Írj üzenetet..."
             value={inputValue}
