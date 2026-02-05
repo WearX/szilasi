@@ -124,6 +124,27 @@ export const api = {
     URL.revokeObjectURL(a.href);
   },
 
+  // Chat Image Upload
+  async uploadChatImage(file: File, target: string): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('image', file);
+    if (target.startsWith('GRP_')) {
+      formData.append('groupId', target.split('_')[1]);
+    } else if (target) {
+      formData.append('targetEmail', target);
+    }
+    const res = await fetch(`${API_BASE}/messages/image`, {
+      method: 'POST',
+      headers: headers(),
+      body: formData,
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Képfeltöltés sikertelen');
+    }
+    return res.json();
+  },
+
   // WebSocket URL
   getWsUrl(): string {
     return `ws://localhost:8080?token=${getToken()}`;
